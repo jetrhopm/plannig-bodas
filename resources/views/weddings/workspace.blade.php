@@ -220,6 +220,12 @@
         </section>
         <main class="wrap">
             <section class="areas scroll-fade">
+                <a
+                    class="area"
+                    href="{{ $basePath }}/bodas/{{ $wedding->id }}/centro"
+                    ><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 21v-6h6v6"/></svg><b>Centro</b
+                    ><small>Vista general</small></a
+                >
                 @if($canViewProfile)
                 <a
                     class="area"

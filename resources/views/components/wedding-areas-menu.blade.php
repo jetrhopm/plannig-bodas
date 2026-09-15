@@ -9,6 +9,11 @@
     ];
 @endphp
 <section class="areas-menu" aria-label="Áreas de trabajo">
+    <div class="areas-menu__hero" style="background-image:linear-gradient(90deg,#fff4efdd,#fff4ef8c),url('{{ $basePath }}/images/casa-de-bodas-hero.png')">
+        <p>CENTRO DE TRABAJO</p><h1>{{ $navigation['wedding']['name'] }}</h1>
+        <div>Organiza, planifica y haz realidad momentos inolvidables.</div>
+        <aside><small>{{ $navigation['wedding']['next_event']['date'] ?? 'Fecha pendiente' }}</small><b>{{ $navigation['wedding']['next_event']['venue'] ?? 'Lugar pendiente' }}</b></aside>
+    </div>
     <div class="areas-menu__head"><strong>{{ $navigation['wedding']['name'] }}</strong><small>ÁREAS DE TRABAJO</small></div>
     <div class="areas-menu__grid">
         @foreach($navigation['items'] as $item)

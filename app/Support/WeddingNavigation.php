@@ -13,6 +13,7 @@ class WeddingNavigation
      */
     public static function for(User $user, Wedding $wedding): array
     {
+        $nextEvent = $wedding->events()->orderByDesc('is_primary')->orderBy('event_date')->first();
         $membership = $user->weddingMemberships()->where('wedding_id', $wedding->id)->first();
         $canEdit = $user->can('update', $wedding);
         $canFinance = $user->role === 'admin' || (bool) data_get($membership?->permissions, 'view_finance');
@@ -24,7 +25,14 @@ class WeddingNavigation
         $canViewProfile = ! in_array($user->role, ['finance', 'reception'], true);
 
         return [
-            'wedding' => ['id' => $wedding->id, 'name' => $wedding->name],
+            'wedding' => [
+                'id' => $wedding->id,
+                'name' => $wedding->name,
+                'next_event' => $nextEvent ? [
+                    'date' => $nextEvent->event_date?->toDateString(),
+                    'venue' => $nextEvent->venue,
+                ] : null,
+            ],
             'items' => [
                 ['label' => 'Centro', 'route' => 'weddings.workspace', 'visible' => true],
                 ['label' => 'Expediente', 'route' => 'weddings.show', 'visible' => $canViewProfile],
