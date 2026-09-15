@@ -24,6 +24,7 @@
             });
         </script>
         @routes
+        <script src="{{ rtrim(request()->getBaseUrl(), '/') }}/js/wedding-area-menu.js" defer></script>
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
         @inertiaHead
     </head>
