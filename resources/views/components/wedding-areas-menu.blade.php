@@ -5,4 +5,4 @@
     $config = ['basePath'=>$basePath,'wedding'=>$navigation['wedding'],'items'=>collect($navigation['items'])->map(fn ($item) => [...$item,'icon'=>$icons[$item['label']] ?? 'dossier','href'=>$basePath.'/bodas/'.$navigation['wedding']['id'].$paths[$item['route']],'active'=>$activeRoute ? $item['route'] === $activeRoute : request()->routeIs($item['route'])])->values()];
 @endphp
 <wedding-area-menu data-config='@json($config)'></wedding-area-menu>
-<script src="{{ $basePath }}/js/wedding-area-menu.js" defer></script>
+<script src="{{ $basePath }}/js/wedding-area-menu.js?v={{ filemtime(public_path('js/wedding-area-menu.js')) }}" defer></script>
