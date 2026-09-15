@@ -15,6 +15,77 @@
 body { background: var(--cb-paper); color: var(--cb-ink); font-family: "DM Sans", Arial, sans-serif; }
 h1, h2, h3, h4, .font-serif { font-family: "Playfair Display", Georgia, serif !important; }
 
+/* Shared botanical background. Markup is injected once by casa-bodas-theme.js. */
+.cb-botanical-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    overflow: hidden;
+    pointer-events: none;
+    contain: layout paint;
+}
+.cb-botanical {
+    position: absolute;
+    width: 90px;
+    height: 280px;
+    opacity: .38;
+    transform-origin: 50% 100%;
+    animation: cb-breeze 5s ease-in-out infinite alternate;
+}
+.cb-botanical--left { left: -26px; bottom: 5vh; }
+.cb-botanical--right { right: -27px; top: 19vh; transform: scaleX(-1); animation-delay: -2.5s; }
+.cb-botanical__stem {
+    position: absolute;
+    bottom: 0;
+    left: 48px;
+    width: 2px;
+    height: 240px;
+    border-radius: 99px;
+    background: #82936d;
+    transform: rotate(-12deg);
+}
+.cb-botanical__leaf,
+.cb-botanical__bloom { position: absolute; display: block; }
+.cb-botanical__leaf {
+    width: 48px;
+    height: 78px;
+    border-radius: 100% 0 100% 0;
+    background: linear-gradient(135deg, #d6a497, #f2d7c9);
+    transform-origin: 100% 100%;
+}
+.cb-botanical__leaf--1 { left: 16px; top: 10px; transform: rotate(-28deg); }
+.cb-botanical__leaf--2 { left: 39px; top: 77px; transform: rotate(70deg); }
+.cb-botanical__leaf--3 { left: 13px; top: 144px; transform: rotate(-28deg) scale(.7); }
+.cb-botanical__bloom {
+    display: none;
+}
+.cb-botanical__bloom--1 { left: 31px; top: 20px; transform: rotate(14deg); }
+.cb-botanical__bloom--2 { left: 61px; top: 86px; transform: scale(.68) rotate(-17deg); }
+.cb-petal {
+    position: absolute;
+    top: -12vh;
+    width: 28px;
+    height: 42px;
+    border-radius: 100% 0 100% 0;
+    background: radial-gradient(circle at 75% 25%, #ffe6e4 0 12%, #dd8998 68%, #a94f65 100%);
+    box-shadow: 0 7px 12px rgb(113 56 71 / 18%);
+    animation: cb-petal-drift 11s linear infinite;
+}
+.cb-petal:nth-child(3) { left: 4%; animation-delay: -2s; }
+.cb-petal:nth-child(4) { right: 8%; top: 8%; scale: .75; animation-delay: -7s; }
+.cb-petal:nth-child(5) { left: 15%; top: 42%; scale: .6; animation-delay: -4s; }
+.cb-petal:nth-child(6) { right: 3%; top: auto; bottom: 16%; animation-delay: -9s; }
+.cb-petal:nth-child(7) { left: 40%; top: auto; bottom: -8%; scale: .85; animation-delay: -5s; }
+@keyframes cb-breeze {
+    from { rotate: -3deg; translate: 0 0; }
+    to { rotate: 4deg; }
+}
+@keyframes cb-petal-drift {
+    0% { transform: translate3d(0, -10vh, 0) rotate(-20deg); }
+    50% { transform: translate3d(25px, 52vh, 0) rotate(120deg); }
+    100% { transform: translate3d(-18px, 115vh, 0) rotate(245deg); }
+}
+
 main :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
     width: 100%;
     border: 1px solid #e3d0c8 !important;
@@ -75,11 +146,14 @@ main .text-stone-500, main .text-gray-500 { color: var(--cb-muted) !important; }
 main .text-rose-800, main .text-rose-700 { color: var(--cb-wine) !important; }
 
 @media (max-width: 640px) {
+    .cb-botanical { width: 62px; opacity: .25; }
+    .cb-botanical--right { top: 35vh; }
     main :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) { font-size: 16px !important; }
     main table { min-width: 620px; }
     main :where(.overflow-x-auto, .overflow-hidden):has(> table) { overflow-x: auto !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .cb-botanical, .cb-petal { animation: none !important; }
     main *, main *::before, main *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }

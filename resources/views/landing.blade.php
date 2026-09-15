@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="theme-color" content="#9f5f68" />
         <title>Casa de Bodas</title>
-        <x-theme-assets :base-path="$basePath" />
+        <x-theme-assets :base-path="$basePath" :botanical="false" />
         <style>
             :root {
                 --rose: #9f5f68;

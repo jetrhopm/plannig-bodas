@@ -193,17 +193,10 @@
                     margin-top: 0;
                 }
             }
-            .petals { position: fixed; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
-            .petal { position: absolute; width: 34px; height: 50px; border-radius: 100% 0 100% 0; background: radial-gradient(circle at 75% 25%,#ffdfe1 0 10%,#d98697 66%,#a84d64 100%); box-shadow: 0 8px 13px #7c405630; animation: drift 9s linear infinite; }
-            .petal:nth-child(1){left:4%;top:4%;animation-delay:-2s}.petal:nth-child(2){right:7%;top:27%;scale:.8;animation-delay:-5s}.petal:nth-child(3){left:2%;bottom:18%;animation-delay:-7s}.petal:nth-child(4){right:8%;bottom:7%;scale:1.2;animation-delay:-1s}.petal:nth-child(5){left:18%;bottom:2%;scale:.7;animation-delay:-4s}
             .form { position: relative; z-index: 1; padding: 28px; border: 1px solid #fff; border-radius: 28px; background: linear-gradient(135deg,#fffdfbe8,#faeeeadd); box-shadow: 0 24px 65px #7a4f4820; backdrop-filter: blur(10px); }
-            .panel::before,.panel::after{content:'';position:fixed;z-index:0;width:170px;height:260px;opacity:.35;background:radial-gradient(ellipse at 30% 20%,#b38a72 0 10%,transparent 12%),radial-gradient(ellipse at 80% 45%,#d4ae91 0 9%,transparent 11%),radial-gradient(ellipse at 45% 72%,#a77d66 0 11%,transparent 13%);filter:blur(1px)}.panel::before{left:-35px;bottom:0;transform:rotate(-20deg)}.panel::after{right:-45px;top:0;transform:rotate(30deg)}
-            @keyframes drift { 0%{transform:translate3d(0,-12vh,0) rotate(-20deg)} 50%{transform:translate3d(28px,48vh,0) rotate(125deg)} 100%{transform:translate3d(-18px,115vh,0) rotate(260deg)} }
-            @media (prefers-reduced-motion: reduce) { .petal { animation: none; } }
         </style>
     </head>
     <body>
-        <div class="petals" aria-hidden="true"><i class="petal"></i><i class="petal"></i><i class="petal"></i><i class="petal"></i><i class="petal"></i></div>
         <main class="shell">
             <section class="visual">
                 <img
