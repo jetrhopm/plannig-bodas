@@ -13,24 +13,24 @@ const showingNavigationDropdown = ref(false);
 
 <template>
     <div>
-        <div class="premium-page min-h-screen bg-gray-100">
-            <nav :class="$page.props.weddingContext ? 'wedding-topbar' : 'border-b border-gray-100 bg-white/95 backdrop-blur'">
+        <div class="premium-page min-h-screen bg-gray-100" :class="{ 'wedding-flow-theme': $page.props.weddingContext }">
+            <nav
+                v-if="!$page.props.weddingContext"
+                class="border-b border-gray-100 bg-white/95 backdrop-blur"
+            >
                 <!-- Primary Navigation Menu -->
-                <div :class="$page.props.weddingContext ? 'wedding-topbar__inner' : 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'">
-                    <div :class="$page.props.weddingContext ? 'flex h-[70px] justify-between' : 'flex h-16 justify-between'">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="flex h-16 justify-between">
                         <div class="flex">
                             <!-- Logo -->
-                            <div v-if="$page.props.weddingContext" class="flex shrink-0 items-center">
-                                <a :href="route('weddings.workspace', $page.props.weddingContext.wedding.id)" class="wedding-topbar__brand">♡ {{ $page.props.weddingContext.wedding.name }}</a>
-                            </div>
-                            <div v-else class="flex shrink-0 items-center">
+                            <div class="flex shrink-0 items-center">
                                 <Link :href="route('dashboard')">
                                     <ApplicationLogo class="block h-9 w-auto fill-current text-rose-800" />
                                 </Link>
                             </div>
 
                             <!-- Navigation Links -->
-                            <div v-if="!$page.props.weddingContext"
+                            <div
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
                                 <NavLink
@@ -45,7 +45,7 @@ const showingNavigationDropdown = ref(false);
                             </div>
                         </div>
 
-                        <div v-if="!$page.props.weddingContext" class="hidden sm:ms-6 sm:flex sm:items-center">
+                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
@@ -91,19 +91,8 @@ const showingNavigationDropdown = ref(false);
                             </div>
                         </div>
 
-                        <!-- Wedding hamburger: same behavior as Centro -->
-                        <div v-if="$page.props.weddingContext" class="flex items-center">
-                            <button
-                                @click="showingNavigationDropdown = !showingNavigationDropdown"
-                                type="button"
-                                aria-label="Abrir menú"
-                                :aria-expanded="showingNavigationDropdown"
-                                class="wedding-topbar__menu"
-                            >☰</button>
-                        </div>
-
-                        <!-- Default hamburger outside wedding flows -->
-                        <div v-else class="-me-2 flex items-center sm:hidden">
+                        <!-- Hamburger -->
+                        <div class="-me-2 flex items-center sm:hidden">
                             <button
                                 @click="
                                     showingNavigationDropdown =
@@ -149,7 +138,7 @@ const showingNavigationDropdown = ref(false);
                 </div>
 
                 <!-- Responsive Navigation Menu -->
-                <div v-if="!$page.props.weddingContext"
+                <div
                     :class="{
                         block: showingNavigationDropdown,
                         hidden: !showingNavigationDropdown,
@@ -193,14 +182,6 @@ const showingNavigationDropdown = ref(false);
                         </div>
                     </div>
                 </div>
-                <aside v-else-if="showingNavigationDropdown" class="wedding-drawer" aria-label="Menú de la boda">
-                    <a :href="route('dashboard')">Panel principal</a>
-                    <a :href="route('weddings.workspace', $page.props.weddingContext.wedding.id)">Centro de trabajo</a>
-                    <a v-if="$page.props.weddingContext.items.some((item: any) => item.route === 'weddings.planning.index' && item.visible)" :href="route('weddings.planning.index', $page.props.weddingContext.wedding.id)">Planeación</a>
-                    <a v-if="$page.props.weddingContext.items.some((item: any) => item.route === 'weddings.finance.index' && item.visible)" :href="route('weddings.finance.index', $page.props.weddingContext.wedding.id)">Finanzas</a>
-                    <a v-if="$page.props.weddingContext.items.some((item: any) => item.route === 'weddings.reception.index' && item.visible)" :href="route('weddings.reception.index', $page.props.weddingContext.wedding.id)">Recepción</a>
-                    <Link :href="route('logout')" method="post" as="button">Cerrar sesión</Link>
-                </aside>
             </nav>
 
             <WeddingContextNav v-if="$page.props.weddingContext" :context="$page.props.weddingContext" />
@@ -224,5 +205,5 @@ const showingNavigationDropdown = ref(false);
 </template>
 
 <style scoped>
-.wedding-topbar{height:70px;border-bottom:1px solid #f0e2db;background:#fffdfae8}.wedding-topbar__inner{padding:0 5vw}.wedding-topbar__brand{color:#814b55;text-decoration:none;font:600 17px 'Playfair Display',Georgia,serif}.wedding-topbar__menu{display:inline-flex;align-items:center;justify-content:center;width:45px;height:45px;border:0;border-radius:50%;background:#f7e8e5;color:#914f5d;font:21px/1 Arial;transition:transform .2s ease}.wedding-topbar__menu:active{transform:scale(.94)}.wedding-drawer{position:fixed;z-index:50;top:62px;right:5vw;width:min(88vw,300px);padding:14px;border:1px solid #ead8d0;border-radius:18px;background:#fffdfa;box-shadow:0 18px 42px #5d38252b}.wedding-drawer a,.wedding-drawer button{display:block;width:100%;padding:11px 4px;border:0;border-bottom:1px solid #f0e2db;background:none;color:#5f4946;text-align:left;text-decoration:none;font:13px 'DM Sans',Arial}.wedding-drawer button{color:#934e5b}
+.wedding-flow-theme{background:#fbf7f3;color:#392d2c;font-family:'DM Sans',Arial,sans-serif}.wedding-flow-theme :deep(.font-serif),.wedding-flow-theme :deep(h1),.wedding-flow-theme :deep(h2),.wedding-flow-theme :deep(h3){font-family:'Playfair Display',Georgia,serif}.wedding-flow-theme>header{border-color:#ead8d0;background:#fffdfa;box-shadow:none}.wedding-flow-theme>main{background:#fbf7f3}
 </style>

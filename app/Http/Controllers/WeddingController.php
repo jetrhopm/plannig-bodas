@@ -111,6 +111,7 @@ class WeddingController extends Controller
             'canReceive' => $canReceive,
             'canPlan' => ! in_array($request->user()->role, ['finance', 'reception'], true),
             'canViewProfile' => ! in_array($request->user()->role, ['finance', 'reception'], true),
+            'navigation' => \App\Support\WeddingNavigation::for($request->user(), $wedding),
             'basePath' => rtrim($request->getBaseUrl(), '/'),
         ]);
     }
