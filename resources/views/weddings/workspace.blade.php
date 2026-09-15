@@ -262,7 +262,7 @@
                 ><a
                     class="area"
                     href="{{ $basePath }}/bodas/{{ $wedding->id }}/planeacion/logistica"
-                    ><span class="icon">◇</span><b>Logística</b
+                    ><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v10H3zM14 10h4l3 3v4h-7zM6 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm12 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg><b>Logística</b
                     ><small>Proveedores</small></a
                 >
                 @endif

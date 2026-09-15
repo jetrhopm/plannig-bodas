@@ -13,7 +13,7 @@
     <main class="wrap">
         <a class="back" href="{{ $basePath }}/bodas/{{ $wedding->id }}/centro"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>Centro de trabajo</a>
         <section class="hero">
-            <span class="hero__icon"><svg class="line-icon" viewBox="0 0 24 24"><path d="M4 10h16M7 10v10m10-10v10M10 4h4v6h-4z"/></svg></span>
+            <span class="hero__icon"><svg class="line-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21v-5a7 7 0 0 1 14 0v5M9 12v9m6-9v9"/></svg></span>
             <div><small>ORGANIZACIÓN DE INVITADOS</small><h1>Mesas y distribución</h1><p>Define capacidad y organiza a cada familia para el gran día.</p></div>
         </section>
         <section class="card">
@@ -28,7 +28,7 @@
         <section class="grid">
             @forelse($wedding->tables as $table)
                 <article class="table">
-                    <div class="table-top"><span class="table-icon"><svg viewBox="0 0 24 24"><path d="M4 10h16M7 10v10m10-10v10M10 4h4v6h-4z"/></svg></span><span class="occupancy">{{ $table->members->count() }}/{{ $table->capacity }}</span></div>
+                    <div class="table-top"><span class="table-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21v-5a7 7 0 0 1 14 0v5M9 12v9m6-9v9"/></svg></span><span class="occupancy">{{ $table->members->count() }}/{{ $table->capacity }}</span></div>
                     <b>{{ $table->label }}</b><p class="occupancy">lugares ocupados</p>
                     <div class="members">@forelse($table->members as $member)<div>{{ $member->name }}</div>@empty<span>Aún sin invitados asignados.</span>@endforelse</div>
                 </article>
