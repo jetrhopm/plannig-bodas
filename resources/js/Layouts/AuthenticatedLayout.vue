@@ -16,8 +16,8 @@ const showingNavigationDropdown = ref(false);
         <div class="premium-page min-h-screen bg-gray-100">
             <nav :class="$page.props.weddingContext ? 'wedding-topbar' : 'border-b border-gray-100 bg-white/95 backdrop-blur'">
                 <!-- Primary Navigation Menu -->
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between">
+                <div :class="$page.props.weddingContext ? 'wedding-topbar__inner' : 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'">
+                    <div :class="$page.props.weddingContext ? 'flex h-[70px] justify-between' : 'flex h-16 justify-between'">
                         <div class="flex">
                             <!-- Logo -->
                             <div v-if="$page.props.weddingContext" class="flex shrink-0 items-center">
@@ -91,8 +91,19 @@ const showingNavigationDropdown = ref(false);
                             </div>
                         </div>
 
-                        <!-- Hamburger -->
-                        <div class="-me-2 flex items-center sm:hidden">
+                        <!-- Wedding hamburger: same behavior as Centro -->
+                        <div v-if="$page.props.weddingContext" class="flex items-center">
+                            <button
+                                @click="showingNavigationDropdown = !showingNavigationDropdown"
+                                type="button"
+                                aria-label="Abrir menú"
+                                :aria-expanded="showingNavigationDropdown"
+                                class="wedding-topbar__menu"
+                            >☰</button>
+                        </div>
+
+                        <!-- Default hamburger outside wedding flows -->
+                        <div v-else class="-me-2 flex items-center sm:hidden">
                             <button
                                 @click="
                                     showingNavigationDropdown =
@@ -101,7 +112,7 @@ const showingNavigationDropdown = ref(false);
                                 type="button"
                                 aria-label="Abrir menú de navegación"
                                 :aria-expanded="showingNavigationDropdown"
-                                :class="$page.props.weddingContext ? 'wedding-topbar__menu' : 'inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none'"
+                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
                             >
                                 <svg
                                     class="h-6 w-6"
@@ -184,8 +195,10 @@ const showingNavigationDropdown = ref(false);
                 </div>
                 <aside v-else-if="showingNavigationDropdown" class="wedding-drawer" aria-label="Menú de la boda">
                     <a :href="route('dashboard')">Panel principal</a>
-                    <a v-for="item in $page.props.weddingContext.items.filter((item: any) => item.visible)" :key="item.route" :href="route(item.route, $page.props.weddingContext.wedding.id)">{{ item.label }}</a>
-                    <a :href="route('profile.edit')">Mi perfil</a>
+                    <a :href="route('weddings.workspace', $page.props.weddingContext.wedding.id)">Centro de trabajo</a>
+                    <a v-if="$page.props.weddingContext.items.some((item: any) => item.route === 'weddings.planning.index' && item.visible)" :href="route('weddings.planning.index', $page.props.weddingContext.wedding.id)">Planeación</a>
+                    <a v-if="$page.props.weddingContext.items.some((item: any) => item.route === 'weddings.finance.index' && item.visible)" :href="route('weddings.finance.index', $page.props.weddingContext.wedding.id)">Finanzas</a>
+                    <a v-if="$page.props.weddingContext.items.some((item: any) => item.route === 'weddings.reception.index' && item.visible)" :href="route('weddings.reception.index', $page.props.weddingContext.wedding.id)">Recepción</a>
                     <Link :href="route('logout')" method="post" as="button">Cerrar sesión</Link>
                 </aside>
             </nav>
@@ -211,5 +224,5 @@ const showingNavigationDropdown = ref(false);
 </template>
 
 <style scoped>
-.wedding-topbar{height:70px;border-bottom:1px solid #f0e2db;background:#fffdfae8}.wedding-topbar__brand{color:#814b55;text-decoration:none;font:600 17px 'Playfair Display',Georgia,serif}.wedding-topbar__menu{display:inline-flex;align-items:center;justify-content:center;width:45px;height:45px;border:0;border-radius:50%;background:#f7e8e5;color:#914f5d;transition:transform .2s ease}.wedding-topbar__menu:active{transform:scale(.94)}.wedding-drawer{position:absolute;z-index:40;top:62px;right:5vw;width:min(88vw,300px);padding:14px;border:1px solid #ead8d0;border-radius:18px;background:#fffdfa;box-shadow:0 18px 42px #5d38252b}.wedding-drawer a,.wedding-drawer button{display:block;width:100%;padding:11px 4px;border:0;border-bottom:1px solid #f0e2db;background:none;color:#5f4946;text-align:left;text-decoration:none;font:13px 'DM Sans',Arial}.wedding-drawer button{color:#934e5b}
+.wedding-topbar{height:70px;border-bottom:1px solid #f0e2db;background:#fffdfae8}.wedding-topbar__inner{padding:0 5vw}.wedding-topbar__brand{color:#814b55;text-decoration:none;font:600 17px 'Playfair Display',Georgia,serif}.wedding-topbar__menu{display:inline-flex;align-items:center;justify-content:center;width:45px;height:45px;border:0;border-radius:50%;background:#f7e8e5;color:#914f5d;font:21px/1 Arial;transition:transform .2s ease}.wedding-topbar__menu:active{transform:scale(.94)}.wedding-drawer{position:fixed;z-index:50;top:62px;right:5vw;width:min(88vw,300px);padding:14px;border:1px solid #ead8d0;border-radius:18px;background:#fffdfa;box-shadow:0 18px 42px #5d38252b}.wedding-drawer a,.wedding-drawer button{display:block;width:100%;padding:11px 4px;border:0;border-bottom:1px solid #f0e2db;background:none;color:#5f4946;text-align:left;text-decoration:none;font:13px 'DM Sans',Arial}.wedding-drawer button{color:#934e5b}
 </style>
