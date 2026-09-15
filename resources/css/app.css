@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root { --wine: #934e5b; --rose: #c9858d; --ink: #332a2a; --paper: #fcf8f4; --line: #e8d9d1; }
+    body { background: var(--paper); color: var(--ink); font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif; }
+    h1,h2,h3 { font-family: 'Playfair Display', Georgia, serif; letter-spacing: -.025em; }
+    button,input,select,textarea { font: inherit; }
+    input,select,textarea { border-color: #e3d4cd !important; background: #fffdfb !important; border-radius: .7rem !important; }
+    input:focus,select:focus,textarea:focus { border-color: var(--rose) !important; box-shadow: 0 0 0 3px rgb(201 133 141 / .16) !important; }
+}
+
+@layer components {
+    .premium-page { position: relative; min-height: 100%; }
+    .premium-page::before { content: ''; position: fixed; z-index: 0; pointer-events: none; width: 250px; height: 250px; right: -120px; top: 23%; opacity: .26; background: radial-gradient(ellipse at 30% 30%,#d6a78e 0 12%,transparent 13%),radial-gradient(ellipse at 70% 55%,#d18691 0 11%,transparent 13%),radial-gradient(ellipse at 30% 80%,#a87b66 0 11%,transparent 13%); filter: blur(2px); }
+    .premium-page > * { position: relative; z-index: 1; }
+    .premium-card { border: 1px solid var(--line); border-radius: 1.15rem; background: rgb(255 253 251 / .92); box-shadow: 0 14px 35px rgb(86 47 43 / .08); }
+    .premium-button { border-radius: 999px; background: var(--wine); color: white; box-shadow: 0 10px 22px rgb(104 51 62 / .18); transition: transform .2s ease, background .2s ease; }
+    .premium-button:hover { background: #7f3f4c; transform: translateY(-1px); }
+}
+
+/* Harmonize existing Tailwind starter components and page cards without changing their behavior. */
+.bg-gray-100 { background-color: var(--paper) !important; }
+.bg-white { background-color: rgb(255 253 251 / .94) !important; }
+.border-gray-100,.border-gray-200,.border-stone-200 { border-color: var(--line) !important; }
+.text-gray-800,.text-stone-800 { color: var(--ink) !important; }
+.text-rose-800 { color: var(--wine) !important; }
+.bg-gray-800 { background-color: var(--wine) !important; }
+.shadow,.shadow-md,.shadow-sm { box-shadow: 0 12px 30px rgb(86 47 43 / .08) !important; }

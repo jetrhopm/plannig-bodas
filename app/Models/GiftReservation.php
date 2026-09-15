@@ -1,0 +1,2 @@
+<?php
+namespace App\Models; use Illuminate\Database\Eloquent\Model; class GiftReservation extends Model { protected $fillable = ['wedding_gift_id','guest_name','guest_email','quantity','idempotency_key','released_at']; protected function casts(): array { return ['released_at'=>'datetime']; } public function weddingGift(): \Illuminate\Database\Eloquent\Relations\BelongsTo { return $this->belongsTo(WeddingGift::class); } }
