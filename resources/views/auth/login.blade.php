@@ -5,11 +5,7 @@
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="theme-color" content="#9f5f68" />
         <title>Acceso · Casa de Bodas</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-            href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap"
-            rel="stylesheet"
-        />
+        <x-theme-assets :base-path="$basePath" />
         <style>
             * {
                 box-sizing: border-box;

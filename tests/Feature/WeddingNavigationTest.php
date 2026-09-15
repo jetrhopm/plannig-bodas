@@ -31,8 +31,9 @@ class WeddingNavigationTest extends TestCase
 
         $this->actingAs($admin)->get(route('weddings.workspace', $wedding))
             ->assertOk()
-            ->assertInertia(fn ($page) => $page
-                ->where('weddingContext.wedding.id', $wedding->id)
-                ->has('weddingContext.items', 11));
+            ->assertViewIs('weddings.workspace')
+            ->assertViewHas('navigation', fn ($navigation) =>
+                $navigation['wedding']['id'] === $wedding->id
+                && count($navigation['items']) === 11);
     }
 }

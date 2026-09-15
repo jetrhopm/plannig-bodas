@@ -22,10 +22,11 @@ class DashboardRolePanelsTest extends TestCase
 
         $this->actingAs($admin)->get(route('dashboard'))
             ->assertOk()
-            ->assertInertia(fn ($page) => $page
-                ->where('role', 'admin')
-                ->has('roleSummary.tasks', 1)
-                ->where('roleSummary.tasks.0.title', 'Confirmar flores'));
+            ->assertViewIs('dashboard')
+            ->assertViewHas('role', 'admin')
+            ->assertViewHas('roleSummary', fn ($summary) =>
+                count($summary['tasks']) === 1
+                && $summary['tasks'][0]->title === 'Confirmar flores');
     }
 
     public function test_couple_receives_only_its_pending_proposals(): void
@@ -39,9 +40,10 @@ class DashboardRolePanelsTest extends TestCase
 
         $this->actingAs($couple)->get(route('dashboard'))
             ->assertOk()
-            ->assertInertia(fn ($page) => $page
-                ->where('role', 'couple')
-                ->has('roleSummary.proposals', 1)
-                ->where('roleSummary.proposals.0.title', 'Flores propias'));
+            ->assertViewIs('dashboard')
+            ->assertViewHas('role', 'couple')
+            ->assertViewHas('roleSummary', fn ($summary) =>
+                count($summary['proposals']) === 1
+                && $summary['proposals'][0]->title === 'Flores propias');
     }
 }

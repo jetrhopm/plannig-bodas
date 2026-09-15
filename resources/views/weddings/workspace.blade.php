@@ -3,8 +3,7 @@
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#9b5663">
     <title>{{ $wedding->name }} · Casa de Bodas</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+    <x-theme-assets :base-path="$basePath" />
     <style>*{box-sizing:border-box}body{margin:0;background:#fbf7f3;color:#392d2c;font:14px 'DM Sans',Arial}.next{max-width:900px;margin:0 auto;padding:0 5vw 60px}.next h2{margin:6px 0 13px;font:28px 'Playfair Display',Georgia}.eyebrow{font-size:10px;letter-spacing:.22em;color:#a35e68;font-weight:600}.event{display:flex;gap:14px;align-items:center;padding:12px;border:1px solid #ead8d0;border-radius:18px;background:#fffdfa}.event img{width:110px;height:82px;object-fit:cover;border-radius:12px}.event b,.event small{display:block}.event small{margin-top:5px;color:#77635e}</style>
 </head>
 <body>
