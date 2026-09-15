@@ -23,7 +23,11 @@ class WeddingPlanningController extends Controller
     public function seating(Request $request, Wedding $wedding)
     {
         $this->authorize('update', $wedding);
-        return view('weddings.seating', ['wedding' => $wedding->load(['tables.members.family', 'guestFamilies.members']), 'basePath' => rtrim($request->getBaseUrl(), '/')]);
+        return view('weddings.seating', [
+            'wedding' => $wedding->load(['tables.members.family', 'guestFamilies.members']),
+            'basePath' => rtrim($request->getBaseUrl(), '/'),
+            'navigation' => \App\Support\WeddingNavigation::for($request->user(), $wedding),
+        ]);
     }
     public function logistics(Request $request, Wedding $wedding) { $this->authorize('update', $wedding); return Inertia::render('Weddings/Logistics', ['wedding' => $wedding->load(['logistics', 'inspirations']), 'canEdit' => $request->user()->can('update', $wedding)]); }
 
