@@ -110,6 +110,7 @@ class WeddingController extends Controller
             'canFinance' => $canFinance,
             'canReceive' => $canReceive,
             'canPlan' => ! in_array($request->user()->role, ['finance', 'reception'], true),
+            'canViewProfile' => ! in_array($request->user()->role, ['finance', 'reception'], true),
             'basePath' => rtrim($request->getBaseUrl(), '/'),
         ]);
     }
