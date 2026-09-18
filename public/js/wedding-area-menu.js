@@ -5,9 +5,11 @@
 
     class WeddingAreaMenu extends HTMLElement {
         connectedCallback() { this.render(); }
+        disconnectedCallback() { this.removeOutsideHandler(); }
         static get observedAttributes() { return ['data-config']; }
         attributeChangedCallback() { if (this.isConnected) this.render(); }
         render() {
+            this.removeOutsideHandler();
             let config;
             try { config = JSON.parse(this.getAttribute('data-config') || '{}'); } catch { return; }
             const basePath = config.basePath || '';
@@ -30,7 +32,20 @@
             </style><section class="wedding-area-menu"><nav class="topbar"><a class="brand" href="${basePath}/dashboard">♡ ${esc(config.wedding?.name)}</a><button class="menu-button" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button></nav><aside class="drawer" hidden><a href="${basePath}/dashboard">Panel principal</a><a href="${basePath}/bodas/${weddingId}/centro">Centro de trabajo</a>${drawerLinks}<form method="POST" action="${basePath}/logout"><input type="hidden" name="_token" value="${esc(csrf)}"><button type="submit">Cerrar sesión</button></form></aside><section class="hero"><p class="eyebrow">${esc(activeArea.toUpperCase())}</p><h1>${esc(config.wedding?.name)}</h1><p>Organiza, planifica y haz realidad momentos inolvidables.</p>${parsedDate ? `<aside class="date"><small>${esc(weekday)}</small><b>${esc(displayDate)}</b><small>${esc(event.venue || 'Lugar pendiente')}</small></aside>` : ''}</section><nav class="area-nav" aria-label="Áreas de trabajo"><div class="area-grid">${cards}</div></nav></section>`;
             const button = this.querySelector('.menu-button');
             const drawer = this.querySelector('.drawer');
+            const closeDrawer = () => { drawer.hidden = true; button?.setAttribute('aria-expanded', 'false'); };
             button?.addEventListener('click', () => { drawer.hidden = !drawer.hidden; button.setAttribute('aria-expanded', String(!drawer.hidden)); });
+            this._outsideHandler = (event) => {
+                if (!drawer.hidden && !this.contains(event.target)) closeDrawer();
+            };
+            this._escapeHandler = (event) => { if (event.key === 'Escape') closeDrawer(); };
+            document.addEventListener('click', this._outsideHandler);
+            document.addEventListener('keydown', this._escapeHandler);
+        }
+        removeOutsideHandler() {
+            if (this._outsideHandler) document.removeEventListener('click', this._outsideHandler);
+            if (this._escapeHandler) document.removeEventListener('keydown', this._escapeHandler);
+            this._outsideHandler = null;
+            this._escapeHandler = null;
         }
     }
     if (!customElements.get('wedding-area-menu')) customElements.define('wedding-area-menu', WeddingAreaMenu);

@@ -1,20 +1,20 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\WeddingController;
-use App\Http\Controllers\WeddingInterviewController;
-use App\Http\Controllers\WeddingFamilyController;
-use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\AdditionalSeatRequestController;
 use App\Http\Controllers\CapacityExpansionRequestController;
-use App\Http\Controllers\ReceptionController;
-use App\Http\Controllers\WeddingPlanningController;
-use App\Http\Controllers\WeddingFinanceController;
+use App\Http\Controllers\CommunicationPreferenceController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceAttachmentController;
 use App\Http\Controllers\GiftController;
-use App\Http\Controllers\CommunicationPreferenceController;
+use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReceptionController;
+use App\Http\Controllers\WeddingController;
+use App\Http\Controllers\WeddingFamilyController;
+use App\Http\Controllers\WeddingFinanceController;
+use App\Http\Controllers\WeddingInterviewController;
+use App\Http\Controllers\WeddingPlanningController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -46,7 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/bodas/{wedding}/eventos/{event}', [WeddingController::class, 'destroyEvent'])->name('weddings.events.destroy');
     Route::get('/bodas/{wedding}/eventos/nuevo', [WeddingController::class, 'createEvent'])->name('weddings.events.create');
     Route::post('/bodas/{wedding}/eventos', [WeddingController::class, 'storeEvent'])->name('weddings.events.store');
-    Route::patch('/bodas/{wedding}/miembros/{membership}/permisos', [WeddingController::class, 'updateMembershipPermissions'])->name('weddings.memberships.permissions');
+    Route::post('/bodas/{wedding}/permisos', [WeddingController::class, 'updateAllMembershipPermissions'])->name('weddings.memberships.permissions.bulk');
     Route::post('/bodas/{wedding}/servicios', [WeddingController::class, 'storeService'])->name('weddings.services.store');
     Route::patch('/bodas/{wedding}/servicios/{service}', [WeddingController::class, 'updateService'])->name('weddings.services.update');
     Route::delete('/bodas/{wedding}/servicios/{service}', [WeddingController::class, 'destroyService'])->name('weddings.services.destroy');
@@ -59,6 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/bodas/{wedding}/recepcion/{family}/ingresos', [ReceptionController::class, 'record'])->name('weddings.reception.record');
     Route::delete('/bodas/{wedding}/recepcion/ingresos/{entry}', [ReceptionController::class, 'correct'])->name('weddings.reception.correct');
     Route::post('/bodas/{wedding}/familias', [WeddingFamilyController::class, 'store'])->name('weddings.families.store');
+    Route::patch('/bodas/{wedding}/familias/{family}', [WeddingFamilyController::class, 'update'])->name('weddings.families.update');
     Route::patch('/bodas/{wedding}/solicitudes-lugares/{seatRequest}', [AdditionalSeatRequestController::class, 'resolve'])->name('weddings.additional-seats.resolve');
     Route::post('/bodas/{wedding}/ampliaciones-cupo', [CapacityExpansionRequestController::class, 'store'])->name('weddings.capacity-expansions.store');
     Route::patch('/bodas/{wedding}/ampliaciones-cupo/{capacityRequest}/propuesta', [CapacityExpansionRequestController::class, 'propose'])->name('weddings.capacity-expansions.propose');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateWeddingEventRequest;
+use App\Models\User;
 use App\Models\Wedding;
 use App\Models\WeddingAudit;
 use App\Models\WeddingEvent;
@@ -10,7 +11,9 @@ use App\Models\WeddingMembership;
 use App\Models\WeddingResponsibility;
 use App\Models\WeddingService;
 use App\Models\WeddingServiceTemplate;
+use App\Support\MembershipPermissions;
 use Carbon\Carbon;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,14 +21,14 @@ use Inertia\Inertia;
 
 class WeddingController extends Controller
 {
-    use \Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+    use AuthorizesRequests;
 
     public function create(Request $request)
     {
         $this->authorize('create', Wedding::class);
 
         return Inertia::render('Weddings/Create', [
-            'coordinators' => \App\Models\User::query()
+            'coordinators' => User::query()
                 ->whereIn('role', ['admin', 'coordinator'])
                 ->orderBy('name')
                 ->get(['id', 'name', 'email']),
@@ -93,6 +96,7 @@ class WeddingController extends Controller
         $before = $wedding->only(array_keys($data));
         $wedding->update($data);
         WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'wedding.updated', 'subject_type' => Wedding::class, 'subject_id' => $wedding->id, 'before' => $before, 'after' => $wedding->fresh()->only(array_keys($data))]);
+
         return back()->with('success', 'Expediente actualizado.');
     }
 
@@ -104,15 +108,11 @@ class WeddingController extends Controller
         $canFinance = $request->user()->role === 'admin' || (bool) data_get($membership?->permissions, 'view_finance');
         $canReceive = $request->user()->role === 'admin' || $wedding->coordinator_id === $request->user()->id || (bool) data_get($membership?->permissions, 'scan_passes') || (bool) data_get($membership?->permissions, 'edit_wedding');
 
-        return view('weddings.workspace', [
+        return Inertia::render('Weddings/Workspace', [
             'wedding' => $wedding->load(['events' => fn ($query) => $query->orderByDesc('is_primary')]),
             'canEdit' => $canEdit,
             'canFinance' => $canFinance,
             'canReceive' => $canReceive,
-            'canPlan' => ! in_array($request->user()->role, ['finance', 'reception'], true),
-            'canViewProfile' => ! in_array($request->user()->role, ['finance', 'reception'], true),
-            'navigation' => \App\Support\WeddingNavigation::for($request->user(), $wedding),
-            'basePath' => rtrim($request->getBaseUrl(), '/'),
         ]);
     }
 
@@ -140,45 +140,71 @@ class WeddingController extends Controller
         abort_unless($event->wedding_id === $wedding->id, 404);
         WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'event.deleted', 'subject_type' => WeddingEvent::class, 'subject_id' => $event->id, 'before' => $event->toArray()]);
         $event->delete();
+
         return back()->with('success', 'Evento eliminado.');
     }
 
     public function createEvent(Wedding $wedding)
     {
         $this->authorize('update', $wedding);
+
         return Inertia::render('Weddings/EventCreate', ['wedding' => $wedding]);
     }
 
     public function storeEvent(Request $request, Wedding $wedding)
     {
         $this->authorize('update', $wedding);
-        $data = $request->validate(['name' => ['required','string','max:180'], 'type' => ['required','in:reception,ceremony,civil,after_party,other'], 'event_date' => ['nullable','date'], 'event_time' => ['nullable','date_format:H:i'], 'venue' => ['nullable','string','max:180'], 'address' => ['nullable','string','max:500'], 'is_primary' => ['boolean']]);
+        $data = $request->validate(['name' => ['required', 'string', 'max:180'], 'type' => ['required', 'in:reception,ceremony,civil,after_party,other'], 'event_date' => ['nullable', 'date'], 'event_time' => ['nullable', 'date_format:H:i'], 'venue' => ['nullable', 'string', 'max:180'], 'address' => ['nullable', 'string', 'max:500'], 'is_primary' => ['boolean']]);
         $data['starts_at'] = filled($data['event_date'] ?? null) && filled($data['event_time'] ?? null) ? Carbon::createFromFormat('Y-m-d H:i', $data['event_date'].' '.$data['event_time'], $wedding->timezone)->utc() : null;
-        if ($data['is_primary'] ?? false) $wedding->events()->update(['is_primary' => false]);
+        if ($data['is_primary'] ?? false) {
+            $wedding->events()->update(['is_primary' => false]);
+        }
         $event = $wedding->events()->create($data);
         WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'event.created', 'subject_type' => WeddingEvent::class, 'subject_id' => $event->id, 'after' => $event->toArray()]);
+
         return redirect()->route('weddings.show', $wedding)->with('success', 'Evento creado.');
     }
 
-    public function updateMembershipPermissions(Request $request, Wedding $wedding, WeddingMembership $membership)
+    public function updateAllMembershipPermissions(Request $request, Wedding $wedding)
     {
         $this->authorize('update', $wedding);
-        abort_unless($membership->wedding_id === $wedding->id, 404);
-        $data = $request->validate(['permissions' => ['required', 'array'], 'permissions.*' => ['boolean']]);
-        $before = $membership->permissions;
-        $membership->update(['permissions' => $data['permissions']]);
-        WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'membership.permissions_updated', 'subject_type' => WeddingMembership::class, 'subject_id' => $membership->id, 'before' => ['permissions' => $before], 'after' => ['permissions' => $data['permissions']]]);
+        $data = $request->validate([
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['array'],
+            'permissions.*.*' => ['nullable', 'boolean'],
+            'activate_all' => ['nullable', 'boolean'],
+        ]);
+        $keys = MembershipPermissions::keys();
+        $activateAll = $request->boolean('activate_all');
 
-        return back()->with('success', 'Permisos efectivos actualizados.');
+        DB::transaction(function () use ($wedding, $request, $keys, $activateAll): void {
+            $wedding->memberships()->lockForUpdate()->get()->each(function (WeddingMembership $membership) use ($request, $wedding, $keys, $activateAll): void {
+                $next = array_fill_keys($keys, $activateAll);
+                if (! $activateAll) {
+                    foreach ($keys as $key) {
+                        $next[$key] = $request->boolean("permissions.{$membership->id}.{$key}");
+                    }
+                }
+                if ($membership->permissions === $next) {
+                    return;
+                }
+                $before = $membership->permissions;
+                $membership->update(['permissions' => $next]);
+                WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'membership.permissions_updated', 'subject_type' => WeddingMembership::class, 'subject_id' => $membership->id, 'before' => ['permissions' => $before], 'after' => ['permissions' => $next]]);
+            });
+        });
+
+        return back()->with('success', $activateAll ? 'Todos los permisos disponibles quedaron activados.' : 'Permisos guardados.');
     }
 
     public function storeService(Request $request, Wedding $wedding)
     {
         $this->authorize('update', $wedding);
-        $data = $request->validate(['wedding_service_template_id' => ['nullable', 'exists:wedding_service_templates,id'], 'name' => ['required', 'string', 'max:160'], 'owner' => ['required', 'in:company,couple,shared']]);
+        $data = $request->validate(['wedding_service_template_id' => ['nullable', 'exists:wedding_service_templates,id'], 'name' => ['required', 'string', 'max:160'], 'owner' => ['required', 'in:company,couple,shared'], 'status' => ['required', 'in:included,pending,confirmed,cancelled'], 'estimated_cost' => ['nullable', 'numeric', 'min:0']]);
         $template = isset($data['wedding_service_template_id']) ? WeddingServiceTemplate::find($data['wedding_service_template_id']) : null;
-        $service = $wedding->services()->create(['wedding_service_template_id' => $template?->id, 'name' => $data['name'], 'category' => $template?->category, 'owner' => $data['owner'], 'status' => 'included']);
+        $service = $wedding->services()->create(['wedding_service_template_id' => $template?->id, 'name' => $data['name'], 'category' => $template?->category, 'owner' => $data['owner'], 'status' => $data['status'], 'estimated_cost' => $data['estimated_cost']]);
         WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'service.created', 'subject_type' => WeddingService::class, 'subject_id' => $service->id, 'after' => $service->toArray()]);
+
         return back()->with('success', 'Servicio agregado a la configuración.');
     }
 
@@ -187,8 +213,12 @@ class WeddingController extends Controller
         $this->authorize('update', $wedding);
         abort_unless($service->wedding_id === $wedding->id, 404);
         $before = $service->toArray();
-        $service->update($request->validate(['name' => ['required', 'string', 'max:160'], 'owner' => ['required', 'in:company,couple,shared'], 'status' => ['required', 'in:included,pending,confirmed,cancelled'], 'estimated_cost' => ['nullable', 'numeric', 'min:0'], 'details' => ['nullable', 'array']]));
+        $data = $request->validate(['wedding_service_template_id' => ['nullable', 'exists:wedding_service_templates,id'], 'name' => ['required', 'string', 'max:160'], 'owner' => ['required', 'in:company,couple,shared'], 'status' => ['required', 'in:included,pending,confirmed,cancelled'], 'estimated_cost' => ['nullable', 'numeric', 'min:0'], 'details' => ['nullable', 'array']]);
+        $template = isset($data['wedding_service_template_id']) ? WeddingServiceTemplate::find($data['wedding_service_template_id']) : null;
+        $data['category'] = $template?->category;
+        $service->update($data);
         WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'service.updated', 'subject_type' => WeddingService::class, 'subject_id' => $service->id, 'before' => $before, 'after' => $service->fresh()->toArray()]);
+
         return back()->with('success', 'Servicio actualizado.');
     }
 
@@ -198,6 +228,7 @@ class WeddingController extends Controller
         abort_unless($service->wedding_id === $wedding->id, 404);
         WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'service.deleted', 'subject_type' => WeddingService::class, 'subject_id' => $service->id, 'before' => $service->toArray()]);
         $service->delete();
+
         return back()->with('success', 'Servicio eliminado.');
     }
 
@@ -207,6 +238,7 @@ class WeddingController extends Controller
         $data = $request->validate(['label' => ['required', 'string', 'max:180'], 'owner' => ['required', 'in:company,couple,shared'], 'due_date' => ['nullable', 'date'], 'notes' => ['nullable', 'string', 'max:2000']]);
         $responsibility = $wedding->responsibilities()->create($data);
         WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'responsibility.created', 'subject_type' => WeddingResponsibility::class, 'subject_id' => $responsibility->id, 'after' => $responsibility->toArray()]);
+
         return back()->with('success', 'Responsabilidad agregada.');
     }
 
@@ -217,6 +249,7 @@ class WeddingController extends Controller
         $before = $responsibility->toArray();
         $responsibility->update($request->validate(['label' => ['required', 'string', 'max:180'], 'owner' => ['required', 'in:company,couple,shared'], 'status' => ['required', 'in:pending,in_progress,completed,cancelled'], 'due_date' => ['nullable', 'date'], 'notes' => ['nullable', 'string', 'max:2000']]));
         WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'responsibility.updated', 'subject_type' => WeddingResponsibility::class, 'subject_id' => $responsibility->id, 'before' => $before, 'after' => $responsibility->fresh()->toArray()]);
+
         return back()->with('success', 'Responsabilidad actualizada.');
     }
 
@@ -226,6 +259,7 @@ class WeddingController extends Controller
         abort_unless($responsibility->wedding_id === $wedding->id, 404);
         WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'responsibility.deleted', 'subject_type' => WeddingResponsibility::class, 'subject_id' => $responsibility->id, 'before' => $responsibility->toArray()]);
         $responsibility->delete();
+
         return back()->with('success', 'Responsabilidad eliminada.');
     }
 
@@ -234,7 +268,9 @@ class WeddingController extends Controller
         $this->authorize('update', $wedding);
         $interview = $wedding->interview;
         abort_unless($interview, 422, 'Primero guarda la entrevista inicial.');
-        if ($interview->status === 'active') return back()->with('success', 'La configuración ya estaba activa.');
+        if ($interview->status === 'active') {
+            return back()->with('success', 'La configuración ya estaba activa.');
+        }
         DB::transaction(function () use ($wedding, $interview, $request) {
             $interview->update(['status' => 'active']);
             WeddingAudit::create(['wedding_id' => $wedding->id, 'actor_id' => $request->user()->id, 'action' => 'configuration.activated', 'subject_type' => get_class($interview), 'subject_id' => $interview->id, 'after' => ['status' => 'active']]);
@@ -242,6 +278,7 @@ class WeddingController extends Controller
                 $wedding->memberships()->where('relationship', 'partner')->with('user')->get()->each(fn ($membership) => $membership->user->notifications()->create(['id' => (string) Str::uuid(), 'type' => 'configuration', 'data' => ['title' => 'Configuración de boda activada', 'description' => "La configuración de {$wedding->name} está lista para seguimiento.", 'importance' => 'normal']]));
             });
         });
+
         return back()->with('success', 'Configuración activada y pareja notificada.');
     }
 }

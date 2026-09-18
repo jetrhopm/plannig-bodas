@@ -11,11 +11,16 @@
 
         <!-- Scripts -->
         <script>
+            window.__inertiaBooted = false;
             window.__showFrontendBootError = function (message) {
+                // Vite can reject a late CSS preload even when the Inertia
+                // application has already mounted. That is not a broken UI.
+                if (window.__inertiaBooted) return;
                 var box = document.getElementById('frontend-boot-error');
                 if (box) { box.hidden = false; box.querySelector('code').textContent = message; }
             };
             window.addEventListener('error', function (event) {
+                if (event.target !== window) return;
                 window.__showFrontendBootError(event.message || 'Error desconocido al iniciar JavaScript.');
             });
             window.addEventListener('unhandledrejection', function (event) {

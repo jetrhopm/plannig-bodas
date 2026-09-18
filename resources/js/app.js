@@ -24,10 +24,16 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         document.documentElement.classList.add('inertia-ready');
 
-        return createApp({ render: () => h(App, props) })
+        const mounted = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
             .mount(el);
+
+        // The error notice in app.blade only represents a failure before Vue
+        // mounts; async asset-preload warnings after this point are harmless.
+        window.__inertiaBooted = true;
+        document.getElementById('frontend-boot-error')?.setAttribute('hidden', '');
+        return mounted;
     },
     progress: {
         color: '#4B5563',
